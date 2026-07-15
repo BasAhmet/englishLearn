@@ -11,8 +11,8 @@
     
     <style>
         :root {
-            --primary: #ec4899; /* Pembe (Balon temasına uygun) */
-            --bg-color: #e0f2fe; /* Açık mavi gökyüzü */
+            --primary: #ec4899;
+            --bg-color: #e0f2fe;
             --success: #10b981;
             --text: #1e293b;
         }
@@ -23,22 +23,19 @@
             background-color: var(--bg-color);
             margin: 0; padding: 20px;
             display: flex; flex-direction: column; align-items: center;
-            min-height: 100vh; overflow: hidden; /* Balonlar ekrandan taşmasın */
+            min-height: 100vh; overflow: hidden;
         }
 
         header { text-align: center; margin-bottom: 10px; z-index: 10; }
         h1 { font-family: 'Comfortaa', cursive; color: #0f172a; margin: 10px 0; }
         .subtitle { color: #64748b; font-size: 1.1rem; }
 
-        /* --- OYUN ALANI --- */
         #gameArea {
             position: relative;
             width: 100%; max-width: 1000px;
-            height: 70vh; /* Oyun alanının yüksekliği */
-            /* background: rgba(255,255,255,0.3); border-radius: 20px; /* İsteğe bağlı sınır */
+            height: 70vh;
         }
 
-        /* --- HEDEF KELİME ALANI (ÜSTTE SABİT) --- */
         #targetContainer {
             position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
             display: flex; flex-direction: column; align-items: center;
@@ -50,7 +47,6 @@
 
         #targetIcon { font-size: 4rem; color: #f59e0b; margin-bottom: 10px; }
 
-        /* Boş Harf Kutucukları (`_ _ _`) */
         #wordSlotsContainer { display: flex; gap: 10px; }
         
         .letter-slot {
@@ -64,42 +60,36 @@
 
         .letter-slot.filled { border-bottom-color: var(--success); color: var(--success); animation: popIn 0.3s; }
 
-        /* --- BALONLAR (CSS İLE HAREKET ETTİRİLEN) --- */
         .balloon {
             position: absolute;
+            bottom: -150px; /* Balonlar ekranın altından (görünmez alandan) başlar */
             width: 80px; height: 100px;
-            border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%; /* Balon şekli */
+            border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%;
             display: flex; justify-content: center; align-items: center;
             font-size: 2.5rem; font-weight: bold; color: white;
             text-transform: uppercase;
             cursor: pointer;
-            box-shadow: inset -10px -10px 0 rgba(0,0,0,0.1); /* 3D derinlik */
+            box-shadow: inset -10px -10px 0 rgba(0,0,0,0.1);
             transition: transform 0.1s ease, opacity 0.3s ease;
             z-index: 5;
             user-select: none;
         }
 
-        /* Balonun ipi */
         .balloon::after {
             content: ''; position: absolute; bottom: -15px; left: 50%;
             width: 2px; height: 20px; background: rgba(0,0,0,0.2);
             transform: translateX(-50%);
         }
 
-        /* Balon Renkleri (Rastgele atanacak) */
-        .balloon.color1 { background-color: #ef4444; } /* Kırmızı */
-        .balloon.color2 { background-color: #3b82f6; } /* Mavi */
-        .balloon.color3 { background-color: #22c55e; } /* Yeşil */
-        .balloon.color4 { background-color: #eab308; } /* Sarı */
-        .balloon.color5 { background-color: #a855f7; } /* Mor */
+        .balloon.color1 { background-color: #ef4444; }
+        .balloon.color2 { background-color: #3b82f6; }
+        .balloon.color3 { background-color: #22c55e; }
+        .balloon.color4 { background-color: #eab308; }
+        .balloon.color5 { background-color: #a855f7; }
 
-        /* Yanlış harfe tıklayınca sallanma animasyonu */
         .balloon.shake { animation: shake 0.4s; }
-
-        /* Balon patlama animasyonu (Kaybolma) */
         .balloon.popping { animation: popOut 0.3s forwards; pointer-events: none; }
 
-        /* --- KUTLAMA EKRANI --- */
         .celebration {
             display: none; position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -108,13 +98,13 @@
             animation: fadeIn 0.5s;
         }
         .celebration h2 { font-size: 4rem; color: #f59e0b; font-family: 'Comfortaa', cursive; text-shadow: 2px 2px 0px #fff; }
-        .next-btn { background-color: var(--primary); color: white; border: none; padding: 15px 40px; font-size: 1.5rem; border-radius: 50px; cursor: pointer; margin-top: 20px; transition: transform 0.2s; box-shadow: 0 5px 15px rgba(236, 72, 153, 0.4); }
+        .next-btn { background-color: var(--success); color: white; border: none; padding: 15px 40px; font-size: 1.5rem; border-radius: 50px; cursor: pointer; margin-top: 20px; transition: transform 0.2s; box-shadow: 0 5px 15px rgba(16, 185, 129, 0.4); }
         .next-btn:hover { transform: scale(1.1); }
 
-        /* --- CSS ANİMASYONLARI --- */
+        /* Hatalı animasyon düzeltildi: transform: translateY ile ekranın üstüne çıkıyor */
         @keyframes floatUp {
-            0% { transform: translateY(100vh); } /* Ekranın altından başla */
-            100% { transform: translateY(-120px); } /* Ekranın üstüne çık ve kaybol */
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-120vh); } 
         }
 
         @keyframes shake {
@@ -145,17 +135,15 @@
             <i id="targetIcon" class="fa-solid"></i>
             <div id="wordSlotsContainer"></div>
         </div>
-
-        </div>
+    </div>
 
     <div class="celebration" id="celebrationScreen">
         <h2>TEBRİKLER! 🎉</h2>
-        <p style="font-size: 1.5rem; color: #475569;">"DOG" kelimesini başarıyla yazdın!</p>
-        <button class="next-btn" onclick="location.reload()">Tekrar Oyna</button>
+        <p id="celebrationText" style="font-size: 1.5rem; color: #475569;"></p>
+        <button class="next-btn" onclick="nextWord()">Sıradaki Kelime <i class="fa-solid fa-arrow-right"></i></button>
     </div>
 
     <script>
-        // Oyun Verileri
         const wordsData = [
             { word: "CAT", icon: "fa-cat" },
             { word: "DOG", icon: "fa-dog" },
@@ -163,22 +151,25 @@
             { word: "CAR", icon: "fa-car" }
         ];
 
-        let currentWordIndex = 0; // Şimdilik sadece ilk kelimeyi yapalım
-        let currentWordData = wordsData[currentWordIndex];
-        let currentTargetWord = currentWordData.word.toUpperCase();
-        let currentLetterIndex = 0; // Çocuğun patlatması gereken sıradaki harf indeksi
-        let balloonsGenerated = 0;
+        let currentWordIndex = 0; 
+        let currentWordData, currentTargetWord, currentLetterIndex, balloonsGenerated, spawnInterval;
 
         const gameArea = document.getElementById('gameArea');
         const wordSlotsContainer = document.getElementById('wordSlotsContainer');
         const targetIcon = document.getElementById('targetIcon');
+        const celebrationScreen = document.getElementById('celebrationScreen');
+        const celebrationText = document.getElementById('celebrationText');
 
-        // --- OYUNU BAŞLATMA --- //
         function initGame() {
-            // İkonu ayarla
+            // Değişkenleri sıfırla
+            currentWordData = wordsData[currentWordIndex];
+            currentTargetWord = currentWordData.word.toUpperCase();
+            currentLetterIndex = 0;
+            balloonsGenerated = 0;
+            celebrationScreen.style.display = 'none'; // Kutlama ekranını gizle
+
             targetIcon.className = `fa-solid ${currentWordData.icon}`;
 
-            // Boş harf kutucuklarını (`_`) oluştur
             wordSlotsContainer.innerHTML = '';
             for (let i = 0; i < currentTargetWord.length; i++) {
                 const slot = document.createElement('div');
@@ -187,129 +178,111 @@
                 wordSlotsContainer.appendChild(slot);
             }
 
-            // Balonları üretmeye başla (Sürekli üretim)
             startBalloonSpawning();
         }
 
-        // --- BALON ÜRETİM MEKANİZMASI --- //
-        let spawnInterval;
         function startBalloonSpawning() {
-            // Her 1.5 saniyede bir yeni balon üret
+            clearInterval(spawnInterval); // Önceki intervali temizle
             spawnInterval = setInterval(generateBalloon, 1500);
-            
-            // İlk açılışta 3 balon hemen gelsin
             for(let i=0; i<3; i++) generateBalloon();
         }
 
         function generateBalloon() {
-            if (balloonsGenerated > 20) return; // Ekranda çok fazla balon birikmesin (Performans için)
+            if (balloonsGenerated > 20) return;
 
             const balloon = document.createElement('div');
             balloon.classList.add('balloon');
-            
-            // Rastgele Renk Atama (1-5 arası sınıf)
             const colorClass = `color${Math.floor(Math.random() * 5) + 1}`;
             balloon.classList.add(colorClass);
 
-            // Rastgele Harf Seçimi:
-            // %60 ihtimalle kelimenin sıradaki harfini, %40 ihtimalle rastgele başka bir harf üret
             let char;
             if (Math.random() < 0.6) {
-                // Sıradaki doğru harf (C, A veya T)
                 char = currentTargetWord[currentLetterIndex];
             } else {
-                // Rastgele yanlış harf (distractor)
                 const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
                 char = alphabet[Math.floor(Math.random() * alphabet.length)];
-                // Yanlış harf, sıradaki doğru harfle aynı olmasın
                 if(char === currentTargetWord[currentLetterIndex]) char = 'X'; 
             }
+            
             balloon.textContent = char;
             balloon.setAttribute('data-char', char);
-
-            // Rastgele Yatay Pozisyon (left: 5% - 90%)
             balloon.style.left = `${Math.floor(Math.random() * 85) + 5}%`;
 
-            // Rastgele Yükselme Hızı (CSS Animation Duration: 8s - 15s)
             const duration = Math.floor(Math.random() * 7) + 8;
-            balloon.style.animation = `floatUp ${duration}s linear infinite`;
-
-            // Rastgele Başlama Gecikmesi (Ekrana farklı zamanlarda girsinler)
+            // infinite kaldırıldı, forwards eklendi.
+            balloon.style.animation = `floatUp ${duration}s linear forwards`;
             balloon.style.animationDelay = `${Math.random() * 2}s`;
 
-            // Balona tıklama olayını ekle
             balloon.addEventListener('click', handleBalloonClick);
 
-            gameArea.appendChild(balloon);
-            balloonsGenerated++;
-
-            // Balon animasyonu bittiğinde (ekrandan çıkınca) onu DOM'dan sil
-            balloon.addEventListener('animationiteration', () => {
+            // Animasyon tamamen bittiğinde (infinite olmadığı için tetiklenecek) balonu sil
+            balloon.addEventListener('animationend', () => {
                 balloon.remove();
                 balloonsGenerated--;
             });
+
+            gameArea.appendChild(balloon);
+            balloonsGenerated++;
         }
 
-        // --- BALON TIKLAMA (PATLATMA) OLAYI --- //
         function handleBalloonClick() {
             const clickedChar = this.getAttribute('data-char');
             const targetChar = currentTargetWord[currentLetterIndex];
 
-            // DOĞRU HARF VE DOĞRU SIRA KONTROLÜ
             if (clickedChar === targetChar) {
-                // 1. Balonu patlat (Animasyon ve silme)
                 this.classList.add('popping');
                 playPopSound();
                 
-                // Animasyon bittikten sonra sil
                 this.addEventListener('animationend', () => {
                     this.remove();
                     balloonsGenerated--;
                 });
 
-                // 2. Harf kutucuğunu doldur
                 const currentSlot = wordSlotsContainer.children[currentLetterIndex];
                 currentSlot.textContent = targetChar;
                 currentSlot.classList.add('filled');
 
-                // 3. Sıradaki harfe geç
                 currentLetterIndex++;
 
-                // OYUN BİTTİ Mİ? (Kelime tamamlandı mı?)
                 if (currentLetterIndex === currentTargetWord.length) {
-                    clearInterval(spawnInterval); // Balon üretimini durdur
+                    clearInterval(spawnInterval); 
                     
-                    // Hafif bir gecikme ile kutlama ekranını aç
                     setTimeout(() => {
-                        // Kalan balonları temizle
                         const remainingBalloons = document.querySelectorAll('.balloon');
                         remainingBalloons.forEach(b => b.remove());
                         
-                        document.getElementById('celebrationScreen').style.display = 'flex';
+                        // Tebrik metnini dinamik olarak yazdırıyoruz
+                        celebrationText.textContent = `"${currentTargetWord}" kelimesini başarıyla yazdın!`;
+                        celebrationScreen.style.display = 'flex';
                         playVictorySound();
                     }, 800);
                 }
             } else {
-                // YANLIŞ HARF: Balonu salla ve patlatma
                 this.classList.add('shake');
                 playErrorSound();
-                
-                // Sallanma bittikten sonra sınıfı kaldır (tekrar tıklanabilsin diye)
                 setTimeout(() => {
                     this.classList.remove('shake');
                 }, 400);
             }
         }
 
-        // --- SES MOTORU (Level 1'den) --- //
-        
+        // Sıradaki Kelimeye Geçiş Fonksiyonu
+        function nextWord() {
+            currentWordIndex++;
+            // Eğer kelimeler bittiyse başa sar
+            if (currentWordIndex >= wordsData.length) {
+                currentWordIndex = 0; 
+            }
+            initGame();
+        }
+
         function playPopSound() {
             const context = new (window.AudioContext || window.webkitAudioContext)();
             const osc = context.createOscillator();
             const gain = context.createGain();
             osc.connect(gain); gain.connect(context.destination);
             osc.type = 'sine';
-            osc.frequency.setValueAtTime(800, context.currentTime); // Tiz bir pat sesi
+            osc.frequency.setValueAtTime(800, context.currentTime); 
             gain.gain.setValueAtTime(0.1, context.currentTime);
             gain.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 0.1);
             osc.start(); osc.stop(context.currentTime + 0.1);
@@ -321,7 +294,7 @@
             const gain = context.createGain();
             osc.connect(gain); gain.connect(context.destination);
             osc.type = 'triangle';
-            osc.frequency.setValueAtTime(150, context.currentTime); // Bas ve tok bir 'bip'
+            osc.frequency.setValueAtTime(150, context.currentTime); 
             gain.gain.setValueAtTime(0.2, context.currentTime);
             gain.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 0.3);
             osc.start(); osc.stop(context.currentTime + 0.3);
@@ -329,7 +302,7 @@
 
         function playVictorySound() {
             const context = new (window.AudioContext || window.webkitAudioContext)();
-            const notes = [523.25, 659.25, 783.99, 1046.50]; // C E G C
+            const notes = [523.25, 659.25, 783.99, 1046.50]; 
             let time = context.currentTime;
             notes.forEach((freq, index) => {
                 const osc = context.createOscillator();
