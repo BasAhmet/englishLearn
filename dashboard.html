@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EnglishQuest - Macera Haritası</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@500;700&family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #6366f1;
+            --warning: #f59e0b;
+            --success: #10b981;
+            --bg: #e0f2fe;
+            --card-bg: #ffffff;
+        }
+
+        * { box-sizing: border-box; font-family: 'Fredoka', sans-serif; }
+
+        body {
+            background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%);
+            margin: 0; padding: 20px;
+            display: flex; flex-direction: column; align-items: center;
+            min-height: 100vh;
+        }
+
+        /* --- ÜST PANEL (PROFiL VE TOPLAM YILDIZ) --- */
+        .header-panel {
+            width: 100%; max-width: 800px;
+            background: var(--card-bg);
+            border-radius: 25px;
+            padding: 20px;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+            border: 4px solid #fff;
+        }
+
+        .profile-info { display: flex; align-items: center; gap: 15px; }
+        .avatar {
+            width: 60px; height: 60px; background: #ffe4e6;
+            border-radius: 50%; display: flex; justify-content: center;
+            align-items: center; font-size: 2rem; border: 3px solid #f43f5e;
+        }
+        .profile-text h2 { margin: 0; font-size: 1.5rem; color: #1e293b; }
+        .profile-text p { margin: 0; color: #64748b; font-size: 1rem; }
+
+        .total-stars {
+            background: #fef3c7; border: 3px solid #f59e0b;
+            padding: 10px 20px; border-radius: 50px;
+            display: flex; align-items: center; gap: 10px;
+            font-size: 1.5rem; font-weight: bold; color: #d97706;
+        }
+
+        /* --- MACERA HARITASI (LEVEL KARTLARI) --- */
+        .map-container {
+            width: 100%; max-width: 800px;
+            display: flex; flex-direction: column; gap: 20px;
+        }
+
+        .level-card {
+            background: var(--card-bg);
+            border-radius: 25px; padding: 20px;
+            display: flex; align-items: center; justify-content: space-between;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.04);
+            border: 4px solid #fff;
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+        }
+
+        .level-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 25px rgba(0,0,0,0.08);
+        }
+
+        .level-details { display: flex; align-items: center; gap: 20px; }
+        
+        .level-badge {
+            width: 70px; height: 70px; border-radius: 20px;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 2.2rem; color: white;
+        }
+        /* Farklı seviye renkleri */
+        .badge-1 { background: linear-gradient(135deg, #a855f7, #7c3aed); }
+        .badge-2 { background: linear-gradient(135deg, #ec4899, #db2777); }
+        .badge-3 { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+
+        .level-text h3 { margin: 0 0 5px 0; font-size: 1.4rem; color: #1e293b; }
+        .level-text p { margin: 0; color: #64748b; font-size: 1rem; }
+
+        /* Yıldız Skorları */
+        .level-stars { display: flex; gap: 5px; margin-top: 5px; }
+        .level-stars i { font-size: 1.3rem; color: #cbd5e1; }
+        .level-stars i.earned { color: var(--warning); animation: pop 0.3s ease-in-out; }
+
+        /* Başlat Butonu */
+        .play-btn {
+            background: var(--success); color: white;
+            border: none; padding: 12px 25px; border-radius: 50px;
+            font-size: 1.2rem; font-weight: bold; cursor: pointer;
+            box-shadow: 0 5px 15px rgba(16, 185, 129, 0.3);
+            transition: transform 0.2s;
+            text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
+        }
+        .play-btn:hover { transform: scale(1.05); }
+
+        /* --- BAŞARILAR (KUPALAR) BÖLÜMÜ --- */
+        .achievements-panel {
+            width: 100%; max-width: 800px;
+            background: var(--card-bg); border-radius: 25px;
+            padding: 25px; margin-top: 30px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            border: 4px solid #fff;
+        }
+
+        .achievements-panel h3 { margin-top: 0; color: #1e293b; font-size: 1.5rem; display: flex; align-items: center; gap: 10px; }
+        .achievements-panel h3 i { color: var(--warning); }
+
+        .trophy-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-top: 15px; }
+        
+        .trophy-card {
+            background: #f8fafc; border: 3px solid #e2e8f0;
+            border-radius: 20px; padding: 15px; text-align: center;
+            transition: all 0.3s ease;
+            filter: grayscale(1); /* Kilitli kupalar gri görünecek */
+            opacity: 0.6;
+        }
+
+        /* Kazanılan kupaların stil güncellemesi */
+        .trophy-card.unlocked {
+            filter: grayscale(0); opacity: 1;
+            background: #fffdf5; border-color: #fde047;
+            transform: scale(1.02);
+            box-shadow: 0 5px 15px rgba(253, 224, 71, 0.2);
+        }
+
+        .trophy-card i { font-size: 3rem; color: var(--warning); margin-bottom: 10px; }
+        .trophy-card h4 { margin: 5px 0; font-size: 1.1rem; color: #1e293b; }
+        .trophy-card p { margin: 0; font-size: 0.85rem; color: #64748b; }
+
+        /* Sıfırlama Butonu (Ebeveyn Kontrolü) */
+        .reset-btn {
+            background: none; border: none; color: #94a3b8;
+            font-size: 0.9rem; cursor: pointer; margin-top: 30px;
+            text-decoration: underline;
+        }
+        .reset-btn:hover { color: #f43f5e; }
+
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.4); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-panel">
+        <div class="profile-info">
+            <div class="avatar">👦</div>
+            <div class="profile-text">
+                <h2>EnglishQuest Kahramanı</h2>
+                <p>Maceraya devam etmeye hazır mısın?</p>
+            </div>
+        </div>
+        <div class="total-stars">
+            <i class="fa-solid fa-star"></i>
+            <span id="totalStarsCount">0</span> Yıldız
+        </div>
+    </div>
+
+    <div class="map-container">
+        
+        <div class="level-card">
+            <div class="level-details">
+                <div class="level-badge badge-1"><i class="fa-solid fa-layer-group"></i></div>
+                <div class="level-text">
+                    <h3>Seviye 1: Kelime Kartları</h3>
+                    <p>Kelimeleri ve seslerini keşfet!</p>
+                    <div class="level-stars" id="level1Stars">
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                    </div>
+                </div>
+            </div>
+            <a href="index.html" class="play-btn">Oyna <i class="fa-solid fa-play"></i></a>
+        </div>
+
+        <div class="level-card">
+            <div class="level-details">
+                <div class="level-badge badge-2"><i class="fa-solid fa-hand-pointer"></i></div>
+                <div class="level-text">
+                    <h3>Seviye 2: Sürükle - Bırak</h3>
+                    <p>Kelimeleri resimlerle eşleştir!</p>
+                    <div class="level-stars" id="level2Stars">
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                    </div>
+                </div>
+            </div>
+            <a href="level2.html" class="play-btn">Oyna <i class="fa-solid fa-play"></i></a>
+        </div>
+
+        <div class="level-card">
+            <div class="level-details">
+                <div class="level-badge badge-3"><i class="fa-solid fa-circle-nodes"></i></div>
+                <div class="level-text">
+                    <h3>Seviye 3: Balon Patlatma</h3>
+                    <p>Doğru harfleri sırayla vur!</p>
+                    <div class="level-stars" id="level3Stars">
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                    </div>
+                </div>
+            </div>
+            <a href="level3.html" class="play-btn">Oyna <i class="fa-solid fa-play"></i></a>
+        </div>
+
+    </div>
+
+    <div class="achievements-panel">
+        <h3><i class="fa-solid fa-trophy"></i> Kazandığın Kupalar (Badges)</h3>
+        <div class="trophy-grid">
+            
+            <div class="trophy-card" id="trophyExplorer">
+                <i class="fa-solid fa-compass"></i>
+                <h4>Kelime Gezgini</h4>
+                <p>Seviye 1'i tamamla</p>
+            </div>
+
+            <div class="trophy-card" id="trophyMatcher">
+                <i class="fa-solid fa-puzzle-piece"></i>
+                <h4>Eşleştirme Ustası</h4>
+                <p>Seviye 2'yi tamamla</p>
+            </div>
+
+            <div class="trophy-card" id="trophySpeller">
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                <h4>Harf Avcısı</h4>
+                <p>Seviye 3'ü tamamla</p>
+            </div>
+
+        </div>
+    </div>
+
+    <button class="reset-btn" onclick="resetProgress()">İlerlemeyi Sıfırla (Veliler İçin)</button>
+
+    <script>
+        // --- LOCAL STORAGE ENTEGRASYONU (MOTiVASYON MOTORU) --- //
+
+        // 1. İlerlemeyi Yükle ve UI'ı Güncelle
+        function loadProgress() {
+            // LocalStorage'dan verileri çek (Eğer hiç yoksa varsayılan olarak 0 yükle)
+            const lvl1Stars = parseInt(localStorage.getItem('eq_lvl1_stars') || '0');
+            const lvl2Stars = parseInt(localStorage.getItem('eq_lvl2_stars') || '0');
+            const lvl3Stars = parseInt(localStorage.getItem('eq_lvl3_stars') || '0');
+
+            // Toplam yıldız sayısını hesapla
+            const totalStars = lvl1Stars + lvl2Stars + lvl3Stars;
+            document.getElementById('totalStarsCount').textContent = totalStars;
+
+            // UI'daki Yıldızları Güncelle
+            updateStarsUI('level1Stars', lvl1Stars);
+            updateStarsUI('level2Stars', lvl2Stars);
+            updateStarsUI('level3Stars', lvl3Stars);
+
+            // Kupaları (Trophies) Kontrol Et ve Aç
+            if (lvl1Stars === 3) document.getElementById('trophyExplorer').classList.add('unlocked');
+            if (lvl2Stars === 3) document.getElementById('trophyMatcher').classList.add('unlocked');
+            if (lvl3Stars === 3) document.getElementById('trophySpeller').classList.add('unlocked');
+        }
+
+        // Yıldızları ekranda aktif/pasif yapan fonksiyon
+        function updateStarsUI(containerId, activeCount) {
+            const container = document.getElementById(containerId);
+            const stars = container.querySelectorAll('i');
+            stars.forEach((star, index) => {
+                if (index < activeCount) {
+                    star.classList.add('earned');
+                } else {
+                    star.classList.remove('earned');
+                }
+            });
+        }
+
+        // İlerlemeyi Tamamen Sıfırlama Fonksiyonu (LocalStorage temizliği)
+        function resetProgress() {
+            if (confirm("Tüm yıldızları ve kupaları sıfırlamak istiyor musun?")) {
+                localStorage.removeItem('eq_lvl1_stars');
+                localStorage.removeItem('eq_lvl2_stars');
+                localStorage.removeItem('eq_lvl3_stars');
+                
+                // Sayfayı yenileyerek UI'ı güncelle
+                location.reload();
+            }
+        }
+
+        // Sayfa açıldığında ilerlemeyi yükle
+        window.onload = loadProgress;
+
+    </script>
+</body>
+</html>
