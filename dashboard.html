@@ -187,7 +187,7 @@
                     </div>
                 </div>
             </div>
-            <a href="index.html" class="play-btn">Oyna <i class="fa-solid fa-play"></i></a>
+            <a href="level1.html" class="play-btn">Oyna <i class="fa-solid fa-play"></i></a>
         </div>
 
         <div class="level-card">
@@ -251,15 +251,41 @@
 
     <button class="reset-btn" onclick="resetProgress()">İlerlemeyi Sıfırla (Veliler İçin)</button>
 
-    <script>
-        // --- LOCAL STORAGE ENTEGRASYONU (MOTiVASYON MOTORU) --- //
+    <script type="module">
+    // Firebase modüllerini internetten (CDN) çekiyoruz
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+    import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-        // 1. İlerlemeyi Yükle ve UI'ı Güncelle
-        function loadProgress() {
-            // LocalStorage'dan verileri çek (Eğer hiç yoksa varsayılan olarak 0 yükle)
-            const lvl1Stars = parseInt(localStorage.getItem('eq_lvl1_stars') || '0');
-            const lvl2Stars = parseInt(localStorage.getItem('eq_lvl2_stars') || '0');
-            const lvl3Stars = parseInt(localStorage.getItem('eq_lvl3_stars') || '0');
+    // BURAYA KENDİ FİREBASE CONFIG BİLGİLERİNİ YAPIŞTIR
+    const firebaseConfig = {
+        apiKey: "SENIN_API_KEY_IN",
+        authDomain: "proje-adi.firebaseapp.com",
+        projectId: "proje-adi",
+        storageBucket: "proje-adi.appspot.com",
+        messagingSenderId: "123456789",
+        appId: "1:12345:web:abcd"
+    };
+
+    // Firebase ve Veritabanını Başlat
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Oğlunun verilerinin tutulacağı sabit bulut adresi (Belge/Document)
+    const playerDocRef = doc(db, "players", "hero_1"); 
+
+    // 1. İlerlemeyi Buluttan Yükle ve UI'ı Güncelle
+    async function loadProgress() {
+        try {
+            const docSnap = await getDoc(playerDocRef);
+            
+            let lvl1Stars = 0, lvl2Stars = 0, lvl3Stars = 0;
+
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                lvl1Stars = data.lvl1_stars || 0;
+                lvl2Stars = data.lvl2_stars || 0;
+                lvl3Stars = data.lvl3_stars || 0;
+            }
 
             // Toplam yıldız sayısını hesapla
             const totalStars = lvl1Stars + lvl2Stars + lvl3Stars;
@@ -270,40 +296,39 @@
             updateStarsUI('level2Stars', lvl2Stars);
             updateStarsUI('level3Stars', lvl3Stars);
 
-            // Kupaları (Trophies) Kontrol Et ve Aç
+            // Kupaları Kontrol Et
             if (lvl1Stars === 3) document.getElementById('trophyExplorer').classList.add('unlocked');
             if (lvl2Stars === 3) document.getElementById('trophyMatcher').classList.add('unlocked');
             if (lvl3Stars === 3) document.getElementById('trophySpeller').classList.add('unlocked');
-        }
 
-        // Yıldızları ekranda aktif/pasif yapan fonksiyon
-        function updateStarsUI(containerId, activeCount) {
-            const container = document.getElementById(containerId);
-            const stars = container.querySelectorAll('i');
-            stars.forEach((star, index) => {
-                if (index < activeCount) {
-                    star.classList.add('earned');
-                } else {
-                    star.classList.remove('earned');
-                }
+        } catch (error) {
+            console.error("Veriler çekilirken hata oluştu:", error);
+        }
+    }
+
+    function updateStarsUI(containerId, activeCount) {
+        const container = document.getElementById(containerId);
+        const stars = container.querySelectorAll('i');
+        stars.forEach((star, index) => {
+            if (index < activeCount) star.classList.add('earned');
+            else star.classList.remove('earned');
+        });
+    }
+
+    // Bu fonksiyonu HTML'deki butondan çağırabilmek için global window objesine ekliyoruz
+    window.resetProgress = async function() {
+        if (confirm("Tüm yıldızları ve kupaları buluttan silmek istiyor musun?")) {
+            await setDoc(playerDocRef, {
+                lvl1_stars: 0,
+                lvl2_stars: 0,
+                lvl3_stars: 0
             });
+            location.reload();
         }
+    }
 
-        // İlerlemeyi Tamamen Sıfırlama Fonksiyonu (LocalStorage temizliği)
-        function resetProgress() {
-            if (confirm("Tüm yıldızları ve kupaları sıfırlamak istiyor musun?")) {
-                localStorage.removeItem('eq_lvl1_stars');
-                localStorage.removeItem('eq_lvl2_stars');
-                localStorage.removeItem('eq_lvl3_stars');
-                
-                // Sayfayı yenileyerek UI'ı güncelle
-                location.reload();
-            }
-        }
-
-        // Sayfa açıldığında ilerlemeyi yükle
-        window.onload = loadProgress;
-
-    </script>
+    // Sayfa açıldığında verileri yükle
+    window.onload = loadProgress;
+</script>
 </body>
 </html>
