@@ -12,7 +12,6 @@
     <style>
         :root {
             --primary: #ec4899;
-            --bg-color: #e0f2fe;
             --success: #10b981;
             --text: #1e293b;
         }
@@ -20,34 +19,42 @@
         * { box-sizing: border-box; font-family: 'Fredoka', sans-serif; }
         
         body {
-            background-color: var(--bg-color);
+            background-color: #f0f9ff;
             margin: 0; padding: 20px;
             display: flex; flex-direction: column; align-items: center;
-            min-height: 100vh; overflow: hidden;
+            height: 100vh; /* Tam ekran yüksekliği */
+            overflow: hidden;
         }
 
-        header { text-align: center; margin-bottom: 10px; z-index: 10; }
-        h1 { font-family: 'Comfortaa', cursive; color: #0f172a; margin: 10px 0; }
-        .subtitle { color: #64748b; font-size: 1.1rem; }
+        header { text-align: center; margin-bottom: 20px; z-index: 10; flex-shrink: 0; }
+        h1 { font-family: 'Comfortaa', cursive; color: #0f172a; margin: 0 0 5px 0; }
+        .subtitle { color: #64748b; font-size: 1.1rem; margin: 0;}
 
+        /* --- GÜNCELLENEN OYUN ALANI --- */
         #gameArea {
             position: relative;
             width: 100%; max-width: 1000px;
-            height: 70vh;
+            flex-grow: 1; /* Kalan tüm yüksekliği kaplar */
+            overflow: hidden; /* DIŞARI TAŞAN BALONLARI GİZLER */
+            background: linear-gradient(180deg, #e0f2fe 0%, #bae6fd 100%); /* Gökyüzü arka planı */
+            border-radius: 20px;
+            border: 4px solid #fff;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            margin-bottom: 10px;
         }
 
         #targetContainer {
-            position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+            position: absolute; top: 15px; left: 50%; transform: translateX(-50%);
             display: flex; flex-direction: column; align-items: center;
-            background: rgba(255,255,255,0.8);
-            padding: 15px 30px; border-radius: 20px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            background: rgba(255,255,255,0.9);
+            padding: 15px 40px; border-radius: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
             z-index: 20;
         }
 
         #targetIcon { font-size: 4rem; color: #f59e0b; margin-bottom: 10px; }
 
-        #wordSlotsContainer { display: flex; gap: 10px; }
+        #wordSlotsContainer { display: flex; gap: 15px; }
         
         .letter-slot {
             width: 50px; height: 60px;
@@ -60,9 +67,10 @@
 
         .letter-slot.filled { border-bottom-color: var(--success); color: var(--success); animation: popIn 0.3s; }
 
+        /* --- GÜNCELLENEN BALON KODU --- */
         .balloon {
             position: absolute;
-            bottom: -150px; /* Balonlar ekranın altından (görünmez alandan) başlar */
+            top: 100%; /* Balonlar oyun alanının en alt sınırının hemen dışından başlar */
             width: 80px; height: 100px;
             border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%;
             display: flex; justify-content: center; align-items: center;
@@ -70,7 +78,6 @@
             text-transform: uppercase;
             cursor: pointer;
             box-shadow: inset -10px -10px 0 rgba(0,0,0,0.1);
-            transition: transform 0.1s ease, opacity 0.3s ease;
             z-index: 5;
             user-select: none;
         }
@@ -87,6 +94,7 @@
         .balloon.color4 { background-color: #eab308; }
         .balloon.color5 { background-color: #a855f7; }
 
+        /* Titreme artık düzgün çalışacak çünkü yukarı çıkma işlemi top ile yapılıyor */
         .balloon.shake { animation: shake 0.4s; }
         .balloon.popping { animation: popOut 0.3s forwards; pointer-events: none; }
 
@@ -97,20 +105,21 @@
             flex-direction: column; justify-content: center; align-items: center;
             animation: fadeIn 0.5s;
         }
-        .celebration h2 { font-size: 4rem; color: #f59e0b; font-family: 'Comfortaa', cursive; text-shadow: 2px 2px 0px #fff; }
+        
+        .celebration h2 { font-size: 4rem; color: #f59e0b; font-family: 'Comfortaa', cursive; text-shadow: 2px 2px 0px #fff; margin-bottom: 10px; }
         .next-btn { background-color: var(--success); color: white; border: none; padding: 15px 40px; font-size: 1.5rem; border-radius: 50px; cursor: pointer; margin-top: 20px; transition: transform 0.2s; box-shadow: 0 5px 15px rgba(16, 185, 129, 0.4); }
         .next-btn:hover { transform: scale(1.1); }
 
-        /* Hatalı animasyon düzeltildi: transform: translateY ile ekranın üstüne çıkıyor */
+        /* --- GÜNCELLENEN ANİMASYONLAR --- */
         @keyframes floatUp {
-            0% { transform: translateY(0); }
-            100% { transform: translateY(-120vh); } 
+            0% { top: 100%; } /* Aşağıdan başla */
+            100% { top: -20%; } /* Oyun alanının üstünden çık */
         }
 
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
-            20%, 60% { transform: translateX(-10px); }
-            40%, 80% { transform: translateX(10px); }
+            20%, 60% { transform: translateX(-15px); }
+            40%, 80% { transform: translateX(15px); }
         }
 
         @keyframes popOut {
@@ -161,12 +170,11 @@
         const celebrationText = document.getElementById('celebrationText');
 
         function initGame() {
-            // Değişkenleri sıfırla
             currentWordData = wordsData[currentWordIndex];
             currentTargetWord = currentWordData.word.toUpperCase();
             currentLetterIndex = 0;
             balloonsGenerated = 0;
-            celebrationScreen.style.display = 'none'; // Kutlama ekranını gizle
+            celebrationScreen.style.display = 'none'; 
 
             targetIcon.className = `fa-solid ${currentWordData.icon}`;
 
@@ -182,7 +190,7 @@
         }
 
         function startBalloonSpawning() {
-            clearInterval(spawnInterval); // Önceki intervali temizle
+            clearInterval(spawnInterval); 
             spawnInterval = setInterval(generateBalloon, 1500);
             for(let i=0; i<3; i++) generateBalloon();
         }
@@ -206,16 +214,16 @@
             
             balloon.textContent = char;
             balloon.setAttribute('data-char', char);
-            balloon.style.left = `${Math.floor(Math.random() * 85) + 5}%`;
+            
+            // Ekranın sağından veya solundan taşmasını engellemek için sınırları 10% - 80% arasına çektim
+            balloon.style.left = `${Math.floor(Math.random() * 70) + 10}%`;
 
             const duration = Math.floor(Math.random() * 7) + 8;
-            // infinite kaldırıldı, forwards eklendi.
             balloon.style.animation = `floatUp ${duration}s linear forwards`;
             balloon.style.animationDelay = `${Math.random() * 2}s`;
 
             balloon.addEventListener('click', handleBalloonClick);
 
-            // Animasyon tamamen bittiğinde (infinite olmadığı için tetiklenecek) balonu sil
             balloon.addEventListener('animationend', () => {
                 balloon.remove();
                 balloonsGenerated--;
@@ -226,6 +234,9 @@
         }
 
         function handleBalloonClick() {
+            // Eğer balon patlama aşamasındaysa veya oyun bittiyse tıklamayı yoksay
+            if (this.classList.contains('popping') || currentLetterIndex >= currentTargetWord.length) return;
+
             const clickedChar = this.getAttribute('data-char');
             const targetChar = currentTargetWord[currentLetterIndex];
 
@@ -251,7 +262,6 @@
                         const remainingBalloons = document.querySelectorAll('.balloon');
                         remainingBalloons.forEach(b => b.remove());
                         
-                        // Tebrik metnini dinamik olarak yazdırıyoruz
                         celebrationText.textContent = `"${currentTargetWord}" kelimesini başarıyla yazdın!`;
                         celebrationScreen.style.display = 'flex';
                         playVictorySound();
@@ -266,10 +276,8 @@
             }
         }
 
-        // Sıradaki Kelimeye Geçiş Fonksiyonu
         function nextWord() {
             currentWordIndex++;
-            // Eğer kelimeler bittiyse başa sar
             if (currentWordIndex >= wordsData.length) {
                 currentWordIndex = 0; 
             }
@@ -316,7 +324,6 @@
             });
         }
 
-        // Oyunu Başlat
         initGame();
 
     </script>
