@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EnglishQuest - Level 2: Eşleştirme Oyunu</title>
+    <!-- Yazı tipleri ve İkonlar (Seviye 1 ile aynı) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@500;700&family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #8b5cf6;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --bg-color: #f8fafc;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Fredoka', sans-serif;
+            user-select: none; /* Metin seçilmesini engeller (sürüklemeyi kolaylaştırır) */
+        }
+
+        body {
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-family: 'Comfortaa', cursive;
+            color: #1e293b;
+            font-size: 2.5rem;
+            margin: 10px 0;
+        }
+
+        .subtitle {
+            color: #64748b;
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+
+        /* Oyun Alanı Konteyneri */
+        .game-container {
+            display: flex;
+            gap: 50px;
+            max-width: 900px;
+            width: 100%;
+            justify-content: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        /* Sürüklenecek Kelimeler (Sol Taraf) */
+        .words-section {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .draggable-word {
+            background-color: white;
+            color: var(--primary);
+            border: 3px solid var(--primary);
+            padding: 15px 25px;
+            border-radius: 15px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-align: center;
+            cursor: grab;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .draggable-word:active {
+            cursor: grabbing;
+            transform: scale(1.05);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        }
+
+        .draggable-word.dragging {
+            opacity: 0.5;
+            border: 3px dashed #cbd5e1;
+        }
+
+        /* Resim Kutuları (Sağ Taraf) */
+        .drop-section {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            flex: 2;
+            min-width: 300px;
+        }
+
+        .drop-box {
+            background-color: white;
+            border: 4px dashed #cbd5e1;
+            border-radius: 20px;
+            height: 180px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .drop-box i {
+            font-size: 4rem;
+            color: #94a3b8;
+            margin-bottom: 10px;
+            transition: color 0.3s;
+        }
+
+        /* Sürüklenen nesne kutunun üzerine geldiğinde */
+        .drop-box.drag-over {
+            background-color: #f0fdf4;
+            border-color: var(--success);
+            transform: scale(1.02);
+        }
+
+        .drop-box.drag-over i {
+            color: var(--success);
+        }
+
+        /* Doğru Eşleştirme Yapıldığında */
+        .drop-box.correct {
+            border: 4px solid var(--success);
+            background-color: #d1fae5;
+        }
+
+        .drop-box.correct i {
+            color: var(--success);
+        }
+
+        /* Kutunun içine yerleşen kelime */
+        .placed-word {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--success);
+            margin-top: 10px;
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* Tebrik Mesajı */
+        .celebration {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,255,255,0.9);
+            z-index: 100;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.5s;
+        }
+
+        .celebration h2 {
+            font-size: 4rem;
+            color: var(--warning);
+            font-family: 'Comfortaa', cursive;
+            text-shadow: 2px 2px 0px #fff, 4px 4px 0px rgba(0,0,0,0.1);
+        }
+
+        .next-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.5rem;
+            border-radius: 50px;
+            cursor: pointer;
+            margin-top: 20px;
+            box-shadow: 0 5px 15px rgba(139, 92, 246, 0.4);
+            transition: transform 0.2s;
+        }
+
+        .next-btn:hover {
+            transform: scale(1.1);
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>EnglishQuest 🚀</h1>
+        <p class="subtitle">Level 2: Doğru Olanı Bul! (Drag & Drop)</p>
+    </header>
+
+    <div class="game-container">
+        <!-- Sürüklenecek Kelimeler (Dinamik oluşturulacak) -->
+        <div class="words-section" id="wordsContainer"></div>
+
+        <!-- Bırakılacak Resim Kutuları (Dinamik oluşturulacak) -->
+        <div class="drop-section" id="dropBoxesContainer"></div>
+    </div>
+
+    <!-- Seviye Tamamlandı Ekranı -->
+    <div class="celebration" id="celebrationScreen">
+        <h2>🎉 HARİKA İŞ! 🎉</h2>
+        <p style="font-size: 1.5rem; color: #475569;">Tüm kelimeleri doğru eşleştirdin!</p>
+        <button class="next-btn" onclick="location.reload()">Tekrar Oyna</button>
+        <!-- İleride buraya "Level 3'e Geç" butonu eklenecek -->
+    </div>
+
+    <script>
+        // Oyun Verileri (Seviye 1'deki kelimelerin devamı niteliğinde)
+        const gameData = [
+            { id: "apple", word: "Apple", icon: "fa-apple-whole" },
+            { id: "dog", word: "Dog", icon: "fa-dog" },
+            { id: "cat", word: "Cat", icon: "fa-cat" },
+            { id: "sun", word: "Sun", icon: "fa-sun" }
+        ];
+
+        let correctMatches = 0;
+        const totalMatches = gameData.length;
+
+        const wordsContainer = document.getElementById('wordsContainer');
+        const dropBoxesContainer = document.getElementById('dropBoxesContainer');
+
+        // 1. Verileri karıştırma (Shuffle) fonksiyonu - Kelimeler her seferinde farklı sırada gelsin
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // 2. Oyunu Başlatma ve Elemanları Ekrana Çizme
+        function initGame() {
+            // Kelimeleri karıştır
+            const shuffledWords = shuffleArray([...gameData]);
+            
+            // Sürüklenecek Kelimeleri (Draggable) Oluştur
+            shuffledWords.forEach(item => {
+                const wordElement = document.createElement('div');
+                wordElement.classList.add('draggable-word');
+                wordElement.draggable = true; // Sürüklenebilir özelliği aktif
+                wordElement.textContent = item.word;
+                wordElement.setAttribute('data-id', item.id);
+                
+                // Sürükleme olaylarını dinle
+                wordElement.addEventListener('dragstart', handleDragStart);
+                wordElement.addEventListener('dragend', handleDragEnd);
+                
+                wordsContainer.appendChild(wordElement);
+            });
+
+            // Resim Kutularını (Drop Zones) Oluştur (Kutuları da kendi içinde karıştırabiliriz)
+            const shuffledBoxes = shuffleArray([...gameData]);
+            
+            shuffledBoxes.forEach(item => {
+                const boxElement = document.createElement('div');
+                boxElement.classList.add('drop-box');
+                boxElement.setAttribute('data-id', item.id);
+                boxElement.innerHTML = `<i class="fa-solid ${item.icon}"></i>`;
+                
+                // Bırakma olaylarını dinle
+                boxElement.addEventListener('dragover', handleDragOver);
+                boxElement.addEventListener('dragleave', handleDragLeave);
+                boxElement.addEventListener('drop', handleDrop);
+                
+                dropBoxesContainer.appendChild(boxElement);
+            });
+        }
+
+        // --- SÜRÜKLE BIRAK (DRAG & DROP) OLAYLARI (EVENTS) --- //
+
+        let draggedElement = null;
+
+        // Sürükleme Başladığında
+        function handleDragStart(e) {
+            draggedElement = this;
+            this.classList.add('dragging');
+            
+            // Sürüklenen veriyi ayarla (Taşınan kelimenin ID'sini hafızaya alıyoruz)
+            e.dataTransfer.setData('text/plain', this.getAttribute('data-id'));
+            
+            // İngilizce telaffuzu dinlet (Sürüklerken kulağı dolsun)
+            playAudio(this.textContent);
+        }
+
+        // Sürükleme Bittiğinde
+        function handleDragEnd() {
+            this.classList.remove('dragging');
+        }
+
+        // Hedef kutunun üzerine gelindiğinde
+        function handleDragOver(e) {
+            e.preventDefault(); // Varsayılan davranışı engelle (drop işlemine izin vermek için şart)
+            
+            // Eğer kutu zaten eşleştirilmişse hiçbir şey yapma
+            if(this.classList.contains('correct')) return;
+            
+            this.classList.add('drag-over');
+        }
+
+        // Hedef kutudan çıkıldığında
+        function handleDragLeave() {
+            this.classList.remove('drag-over');
+        }
+
+        // Kelime kutuya bırakıldığında
+        function handleDrop(e) {
+            e.preventDefault();
+            this.classList.remove('drag-over');
+
+            // Eğer kutu zaten doluysa/doğruysa işlem yapma
+            if(this.classList.contains('correct')) return;
+
+            // Sürüklenen kelimenin ID'sini al
+            const draggedId = e.dataTransfer.getData('text/plain');
+            const targetId = this.getAttribute('data-id');
+
+            // DOĞRU EŞLEŞME KONTROLÜ
+            if (draggedId === targetId) {
+                // Başarı durumunu ayarla
+                this.classList.add('correct');
+                
+                // Kutunun içine kelimeyi yazdır
+                const wordText = document.createElement('div');
+                wordText.classList.add('placed-word');
+                wordText.textContent = draggedElement.textContent;
+                this.appendChild(wordText);
+                
+                // Başarı sesi çal
+                playSuccessSound();
+
+                // Sol taraftan kelimeyi gizle/kaldır
+                draggedElement.style.display = 'none';
+
+                correctMatches++;
+
+                // Oyun bitti mi kontrol et
+                if (correctMatches === totalMatches) {
+                    setTimeout(() => {
+                        document.getElementById('celebrationScreen').style.display = 'flex';
+                        playVictorySound();
+                    }, 500);
+                }
+            } else {
+                // YANLIŞ EŞLEŞME: Kutuya "hayır" animasyonu/titremesi verebiliriz
+                this.style.borderColor = "#ef4444"; // Kırmızı
+                setTimeout(() => {
+                    this.style.borderColor = ""; // Rengi sıfırla
+                }, 500);
+            }
+        }
+
+        // SES MOTORU (Level 1'den tanıdık)
+        function playAudio(text) {
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'en-US';
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function playSuccessSound() {
+            const context = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = context.createOscillator();
+            const gain = context.createGain();
+            osc.connect(gain);
+            gain.connect(context.destination);
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(600, context.currentTime);
+            osc.frequency.setValueAtTime(800, context.currentTime + 0.1);
+            gain.gain.setValueAtTime(0.1, context.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 0.2);
+            osc.start();
+            osc.stop(context.currentTime + 0.2);
+        }
+
+        // Oyun Bitiş Müziği (Basit bir arpej)
+        function playVictorySound() {
+            const context = new (window.AudioContext || window.webkitAudioContext)();
+            const notes = [523.25, 659.25, 783.99, 1046.50]; // C E G C (Majör Akor)
+            let time = context.currentTime;
+            
+            notes.forEach((freq, index) => {
+                const osc = context.createOscillator();
+                const gain = context.createGain();
+                osc.connect(gain);
+                gain.connect(context.destination);
+                osc.frequency.value = freq;
+                gain.gain.setValueAtTime(0.1, time);
+                gain.gain.exponentialRampToValueAtTime(0.01, time + 0.2);
+                osc.start(time);
+                osc.stop(time + 0.2);
+                time += 0.15; // Notalar arası gecikme
+            });
+        }
+
+        // Oyunu Başlat
+        initGame();
+
+    </script>
+</body>
+</html>
